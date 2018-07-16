@@ -24,4 +24,7 @@ public:
 	
 	// Forces Barrel of tank to aim at crosshair
 	void AimTowardsCrosshair();
+
+private:
+	bool GetSightRayHitLocation(FVector& OutHitLocation) const;
 };
