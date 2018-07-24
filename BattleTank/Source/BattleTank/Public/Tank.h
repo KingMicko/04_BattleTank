@@ -27,7 +27,7 @@ public:
 	void AimAt(FVector HitLocation);
 
 	UFUNCTION(BlueprintCallable)
-		void Fire();
+	void Fire();
 
 protected:
 	UTankAimingComponent * TankAimingComponent = nullptr;
