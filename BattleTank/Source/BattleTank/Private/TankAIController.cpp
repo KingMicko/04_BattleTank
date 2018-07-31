@@ -20,7 +20,7 @@ void ATankAIController::Tick(float DeltaTime)
 	// Get the ai controlled tank
 	auto ControlledTank = Cast<ATank>(GetPawn());
 
-	if (PlayerTank)
+	if (ensure(PlayerTank))
 	{
 		// Move towards player
 		MoveToActor(PlayerTank, AcceptanceRadius);
