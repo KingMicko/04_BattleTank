@@ -7,10 +7,8 @@
 #include "TankAIController.generated.h"
 
 /**
- * 
+ * Forces AI tanks to move towards and fire at the player
  */
-// Forward declaration of classes
-class ATank;
 
 UCLASS()
 class BATTLETANK_API ATankAIController : public AAIController
