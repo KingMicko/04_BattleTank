@@ -4,7 +4,7 @@
 
 UTankTrack::UTankTrack()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UTankTrack::BeginPlay()
@@ -14,16 +14,22 @@ void UTankTrack::BeginPlay()
 	OnComponentHit.AddDynamic(this, &UTankTrack::OnHit);
 }
 
-void UTankTrack::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+void UTankTrack::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::TickComponent(DeltaTime,TickType,ThisTickFunction);
+	DriveTrack();
+	ApplySidewaysForce();
+	CurrentThrottle = 0;    // Resets Throttle
+}
 
+void UTankTrack::ApplySidewaysForce()
+{
 	// Calculate the slippage speed
 	auto SlippageSpeed = FVector::DotProduct(GetRightVector(), GetComponentVelocity());
 
 	// Work out the required acceleration this frame to correct
 	// Accell = m * s * s
 	// Gets accel needed in opposite direction to stop tank sliding
+	auto DeltaTime = GetWorld()->GetDeltaSeconds();
 	auto CorrectionAcceleration = -SlippageSpeed / DeltaTime * GetRightVector();
 
 	// Calculate and apply sideways force (F = m * a )
@@ -32,15 +38,16 @@ void UTankTrack::TickComponent(float DeltaTime, enum ELevelTick TickType, FActor
 	TankRoot->AddForce(CorrectionForce);
 }
 
-void UTankTrack::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Im Hit!"));
-}
-
 void UTankTrack::SetThrottle(float Throttle)
 {
+	CurrentThrottle = FMath::Clamp<float>(CurrentThrottle + Throttle, -1, 1);
+
+}
+
+void UTankTrack::DriveTrack()
+{
 	// TODO clamp throttle value to +-1
-	auto ForceApplied = GetForwardVector() * Throttle * TrackMaxDrivingForce;
+	auto ForceApplied = GetForwardVector() * CurrentThrottle * TrackMaxDrivingForce;
 	auto ForceLocation = GetComponentLocation();
 	auto TankRoot = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent());
 	TankRoot->AddForceAtLocation(ForceApplied, ForceLocation);
