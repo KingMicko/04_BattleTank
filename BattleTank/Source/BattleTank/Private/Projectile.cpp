@@ -4,6 +4,8 @@
 #include "Engine/Classes/Components/StaticMeshComponent.h"
 #include "Engine/Classes/Particles/ParticleSystemComponent.h"
 #include "Engine/Classes/PhysicsEngine/RadialForceComponent.h"
+#include "Engine/World.h"
+#include <TimerManager.h>
 
 // Sets default values
 AProjectile::AProjectile()
@@ -46,6 +48,19 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	LaunchBlast->Deactivate();
 	ImpactBlast->Activate();
 	ExplosionForce->FireImpulse();
+
+	/// This code is for destroying the projectiles at the appropriate time
+	SetRootComponent(ImpactBlast);      // Changes the root component
+	CollisionMesh->DestroyComponent();  // Destroys the mesh component to remove it from the world
+
+	// When calling the delegated method dont add the ()
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AProjectile::OnTimerExpire, DestroyDelay,false);
+}
+
+void AProjectile::OnTimerExpire()
+{
+	// Destroy the current projectile
+	Destroy();
 }
 
 void AProjectile::Launch(float Speed)
