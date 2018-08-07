@@ -6,6 +6,8 @@
 #include "Engine/Classes/PhysicsEngine/RadialForceComponent.h"
 #include "Engine/World.h"
 #include <TimerManager.h>
+#include <Kismet/GameplayStatics.h>
+#include <GameFramework/DamageType.h>
 
 // Sets default values
 AProjectile::AProjectile()
@@ -52,6 +54,15 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	/// This code is for destroying the projectiles at the appropriate time
 	SetRootComponent(ImpactBlast);      // Changes the root component
 	CollisionMesh->DestroyComponent();  // Destroys the mesh component to remove it from the world
+	
+	UGameplayStatics::ApplyRadialDamage(
+		this,
+		ProjectileDamage,
+		GetActorLocation(),
+		ExplosionForce->Radius,  // Keeps value consistent with explosion force
+		UDamageType::StaticClass(),
+		TArray<AActor*>()   // Damage all actors
+	);
 
 	// When calling the delegated method dont add the ()
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AProjectile::OnTimerExpire, DestroyDelay,false);
